@@ -5,7 +5,7 @@ import { DiPython, DiReact, DiRuby, DiScala, DiSwift, DiUnitySmall, DiNodejsSmal
 import { MdQuestionMark } from 'react-icons/md';
 import PuzzleCaptcha from './PuzzleCaptcha';
 
-const PuzzleCards = ({ onFinish }) => {
+const PuzzleCards = () => {
     const [cards, setCards] = useState([]);
     const [selectedCards, setSelectedCards] = useState([]);
     const [matchedCards, setMatchedCards] = useState([]);
@@ -43,10 +43,13 @@ const PuzzleCards = ({ onFinish }) => {
     };
 
     const handleCardClick = (card) => {
-        console.log(matchedCards);
-        if (selectedCards.length < 2 && !matchedCards.includes(card)) {
+        if (matchedCards.some((matchedCard) => matchedCard.id === card.id)) {
+            return;
+        }
+
+        if (!card.isFlipped && selectedCards.length < 2) {
             setSelectedCards([...selectedCards, card]);
-            setCards(
+            setCards((cards) =>
                 cards.map((c) => {
                     if (c.id === card.id) {
                         return { ...c, isFlipped: true };
@@ -54,6 +57,10 @@ const PuzzleCards = ({ onFinish }) => {
                     return c;
                 })
             );
+            if (selectedCards.length === 1 && selectedCards[0].icon === card.icon) {
+                setMatchedCards([...matchedCards, selectedCards[0], card]);
+                setSelectedCards([]);
+            }
         }
     };
 
@@ -63,23 +70,36 @@ const PuzzleCards = ({ onFinish }) => {
                 const [card1, card2] = selectedCards;
                 if (card1.icon === card2.icon) {
                     setMatchedCards([...matchedCards, card1, card2]);
-                } else {
-                    setCards(
-                        cards.map((c) => {
-                            if (c.id === card1.id || c.id === card2.id) {
-                                return { ...c, isFlipped: false };
+                    setCards((cards) =>
+                        cards.map((card) => {
+                            if (card.id === card1.id || card.id === card2.id) {
+                                return { ...card, isFlipped: true };
+                            } else {
+                                return card;
                             }
-                            return c;
+                        })
+                    );
+                } else {
+                    setCards((cards) =>
+                        cards.map((card) => {
+                            if (card.id === card1.id || card.id === card2.id) {
+                                return { ...card, isFlipped: false };
+                            } else {
+                                return card;
+                            }
                         })
                     );
                 }
                 setSelectedCards([]);
             }, 1000);
         }
+    }, [selectedCards]);
+
+    useEffect(() => {
         if (matchedCards.length === icons.length * 2) {
             onPuzzleComplete();
         }
-    }, [selectedCards]);
+    }, [matchedCards]);
 
     const handleRestartClick = () => {
         const shuffledIcons = shuffle(icons.concat(icons));
