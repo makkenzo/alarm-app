@@ -1,10 +1,12 @@
 import React, { useEffect, useState } from 'react';
 import PuzzleCards from './PuzzleCards';
+import soundFile from '../assets/alarm.mp3';
 
 const Alarm = () => {
     const [alarmTime, setAlarmTime] = useState('');
     const [alarmSet, setAlarmSet] = useState(false);
     const [alarmTriggered, setAlarmTriggered] = useState(false);
+    const [disabled, setDisabled] = useState(false);
 
     const handleSetAlarm = () => {
         setAlarmSet(true);
@@ -52,6 +54,10 @@ const Alarm = () => {
         if (alarmSet) {
             intervalId = setTimeout(() => {
                 setAlarmTriggered(true);
+                setDisabled(true);
+
+                // const audio = new Audio(soundFile)
+                // audio.play()
             }, getTimeUntilAlarm());
         }
 
@@ -59,6 +65,8 @@ const Alarm = () => {
             clearTimeout(intervalId);
         };
     }, [alarmSet]);
+
+    const handlePuzzleCompletion = () => {};
 
     return (
         <>
@@ -77,6 +85,7 @@ const Alarm = () => {
                             <button
                                 className="bg-red-500 hover:bg-red-600 text-white py-2 px-4 rounded"
                                 onClick={handleCancelAlarm}
+                                disabled={disabled}
                             >
                                 Отменить
                             </button>
