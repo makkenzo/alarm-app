@@ -56,7 +56,6 @@ const PuzzleMath = () => {
 
     return (
         <>
-            {console.log(count === 2)}
             {count === 2 ? (
                 <h1 className="text-3xl font-bold mb-6">Будильник выключен</h1>
             ) : (

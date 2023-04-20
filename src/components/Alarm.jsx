@@ -7,6 +7,8 @@ const Alarm = () => {
     const [alarmSet, setAlarmSet] = useState(false);
     const [alarmTriggered, setAlarmTriggered] = useState(false);
     const [disabled, setDisabled] = useState(false);
+    const [puzzlesPassed, setPuzzlesPassed] = useState(false);
+    const [audioPlaying, setAudioPlaying] = useState(false);
 
     const handleSetAlarm = () => {
         setAlarmSet(true);
@@ -55,9 +57,6 @@ const Alarm = () => {
             intervalId = setTimeout(() => {
                 setAlarmTriggered(true);
                 setDisabled(true);
-
-                // const audio = new Audio(soundFile)
-                // audio.play()
             }, getTimeUntilAlarm());
         }
 
@@ -66,7 +65,37 @@ const Alarm = () => {
         };
     }, [alarmSet]);
 
-    const handlePuzzleCompletion = () => {};
+    useEffect(() => {
+        if (puzzlesPassed) {
+            setAlarmTriggered(false);
+            setDisabled(false);
+        }
+    }, [puzzlesPassed]);
+
+    const handlePuzzlesPassed = (passed) => {
+        setPuzzlesPassed(passed);
+    };
+
+    const playAlarmSound = () => {
+        const audio = new Audio(soundFile);
+        audio.loop = true;
+        audio.play();
+        setAudioPlaying(false);
+    };
+
+    const stopAlarmSound = () => {
+        const audio = new Audio(soundFile);
+        audio.pause();
+        audio.currentTime = 0;
+        setAudioPlaying(false);
+    };
+
+    useEffect(() => {
+        console.log(puzzlesPassed);
+        if (alarmTriggered && !puzzlesPassed) {
+            playAlarmSound();
+        }
+    }, [alarmTriggered, puzzlesPassed]);
 
     return (
         <>
@@ -78,6 +107,11 @@ const Alarm = () => {
                             {alarmTriggered ? (
                                 <>
                                     <p className="text-lg font-medium text-red-500 mr-3">Будильник сработал</p>
+                                    {puzzlesPassed ? (
+                                        <audio autoPlay loop="true">
+                                            <source src="../assets/alarm.mp3" type="audio/mpeg" />
+                                        </audio>
+                                    ) : null}
                                 </>
                             ) : (
                                 <p className="text-lg font-medium mr-3">Будильник установлен на {alarmTime}</p>
